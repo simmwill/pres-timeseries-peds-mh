@@ -1,0 +1,77 @@
+/*-- scss:defaults --*/
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400&display=swap');
+
+$theme-blue: #76AADB;
+$theme-dark-purple: #1A1626;
+$theme-golden: #f5b700;
+$theme-darkred: #541216;
+$theme-orange: #bc6c25;
+
+$font-family-monospace: 'Source Code Pro', monospace;
+
+/*-- scss:rules --*/
+
+// link colors
+
+a {text-decoration: underline; color: $theme-darkred;}
+a:link  {text-decoration: underline; color: $theme-darkred;}
+a:visited {text-decoration: underline; color: $theme-darkred;}
+a:hover {text-decoration: underline; color: $theme-darkred;}
+a:active {text-decoration: underline; color: $theme-darkred;}
+
+// colors
+.dark-purple {
+  color: $theme-dark-purple;
+}
+.blue {
+  color: $theme-blue;
+}
+.golden {
+  color: $theme-golden;
+}
+.orange {
+  color: $theme-orange;
+}
+.orange-code {
+  color: $theme-orange;
+  font-family: 'Source Code Pro', monospace;
+}
+
+// other
+
+.quarto {
+  box-shadow: 0 15px 30px rgba($theme-blue, 0.8);
+}
+
+.slide-deck {
+  width: 100%;
+  height: 400px;
+  border-radius: 5px;
+  margin-bottom: 10px !important;
+  box-shadow: 0 15px 30px rgba($theme-dark-purple, 0.5);
+}
+
+.small {
+  font-size: 16pt;
+}
+
+.medium {
+  font-size: 22pt;
+}
+
+.pull-left {
+  float: left;
+  width: 47%;
+}
+
+.pull-right {
+  float: right;
+  text-align: right;
+  width: 47%;
+}
+
+// smaller footnote text (classified as aside) - found this by using Inspect on the HTML file
+.reveal .slide aside .aside-footnotes {
+  font-size: 0.5em;
+}
