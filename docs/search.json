@@ -1,0 +1,142 @@
+[
+  {
+    "objectID": "index.html#timeseries-using-fable",
+    "href": "index.html#timeseries-using-fable",
+    "title": "",
+    "section": " Timeseries using fable",
+    "text": "Timeseries using fable\n\nModeling COVID-era pediatric mental health emergencies\n\n\n      Will Simmons\n7 September 2023\nWCM Biostatistics Computing Club"
+  },
+  {
+    "objectID": "index.html#what-is-timeseries-data",
+    "href": "index.html#what-is-timeseries-data",
+    "title": "",
+    "section": "What is timeseries data?",
+    "text": "What is timeseries data?\n\n\nData with a time component\n\nCan vary by frequency (e.g., every year, every minute)\n\nExamples\n\nGlobal rainfall by month\nNYC electricity usage by day of week\nHourly temperature in your apartment"
+  },
+  {
+    "objectID": "index.html#timeseries-in-r",
+    "href": "index.html#timeseries-in-r",
+    "title": "",
+    "section": "Timeseries in R",
+    "text": "Timeseries in R\nThe tidyverts"
+  },
+  {
+    "objectID": "index.html#based-on-tsibble-objects",
+    "href": "index.html#based-on-tsibble-objects",
+    "title": "",
+    "section": "Based on tsibble objects",
+    "text": "Based on tsibble objects\n\n\n\nSimilar to a tibble or data.frame, but optimized for timeseries data\n\nPrimary timeseries components in a tsibble:\n\n\nIndex: unit of time measured\nKey: (optional) grouping variable(s)\nMeasured variables: relevant data measured over time"
+  },
+  {
+    "objectID": "index.html#based-on-tsibble-objects-1",
+    "href": "index.html#based-on-tsibble-objects-1",
+    "title": "",
+    "section": "Based on tsibble objects",
+    "text": "Based on tsibble objects\n\n\n\nExample: Yearly population counts across world countries\n\n\n\n\n\ntsibbledata::global_economy |&gt; \n  select(\n    Country,    # Key\n    Year,       # Index\n    Population  # Measured var.\n  ) |&gt; \n  head()\n\n\n# A tsibble: 6 x 3 [1Y]\n# Key:       Country [1]\n  Country      Year Population\n  &lt;fct&gt;       &lt;dbl&gt;      &lt;dbl&gt;\n1 Afghanistan  1960    8996351\n2 Afghanistan  1961    9166764\n3 Afghanistan  1962    9345868\n4 Afghanistan  1963    9533954\n5 Afghanistan  1964    9731361\n6 Afghanistan  1965    9938414"
+  },
+  {
+    "objectID": "index.html#fable-tidy-timeseries",
+    "href": "index.html#fable-tidy-timeseries",
+    "title": "",
+    "section": "fable: tidy timeseries!",
+    "text": "fable: tidy timeseries!\n\n\n\nFit multiple timeseries models simultaneously\n\nExplore, diagnose, plot, forecast\n\nHuge upgrade from the forecast package"
+  },
+  {
+    "objectID": "index.html#motivating-example",
+    "href": "index.html#motivating-example",
+    "title": "",
+    "section": "Motivating example",
+    "text": "Motivating example\nCOVID-era pediatric mental health emergencies in NYC\n\n\nKids are brought to the ED for a number of reasons\n\nMental health (MH) increasingly one of those reasons\n\nMH-related pediatric ED visits seasonal and increasing\n\nNote: results are in-press, so please don’t share!"
+  },
+  {
+    "objectID": "index.html#peds-mh-ed-visit-rate-data",
+    "href": "index.html#peds-mh-ed-visit-rate-data",
+    "title": "",
+    "section": "Peds MH ED visit rate data1",
+    "text": "Peds MH ED visit rate data1\n\n\n\n\n# Simulated representative data\nts_weekly_simulated |&gt; \n  as_tsibble(index = week) |&gt; \n  head()\n\n\n# A tsibble: 6 x 3 [1W]\n      week   rate covid_wave\n    &lt;week&gt;  &lt;dbl&gt;      &lt;dbl&gt;\n1 2016 W01 0.0509          0\n2 2016 W02 0.0502          0\n3 2016 W03 0.0624          0\n4 2016 W04 0.0437          0\n5 2016 W05 0.0504          0\n6 2016 W06 0.0516          0\n\n\n\n\n\n\n\nIndex: week\nKey: none (i.e., no grouping other than week)\nMeasured variables: MH ED visit rate2, COVID wave3\n\n\nData source: INSIGHT Clinical Research Network. https://insightcrn.org/our-data/.% of daily pediatric ED visits with primary MH diagnosis.Pre-COVID + 5 waves."
+  },
+  {
+    "objectID": "index.html#peds-mh-ed-visit-rate-data-1",
+    "href": "index.html#peds-mh-ed-visit-rate-data-1",
+    "title": "",
+    "section": "Peds MH ED visit rate data",
+    "text": "Peds MH ED visit rate data\nLet’s plot the rate data, smoothed with a rolling average\n\n\ncode\nrate_plot &lt;- ts_weekly |&gt; \n  mutate(\n    roll_rate = slider::slide_index_dbl(\n      .x = rate,\n      .i = week,\n      .f = mean,\n      .before = 2,\n      .after = 2\n    )\n  ) |&gt; \n  ggplot(aes(x = week)) +\n  geom_line(aes(y = rate, color = \"Raw weekly rate\")) +\n  geom_line(aes(y = roll_rate, color = \"4-week smoothed rate\")) +\n  geom_segment(aes(color = \"COVID\",\n                   x = ymd(\"2020-03-01\"), xend = ymd(\"2020-03-01\"),\n                   y = 0, yend = 0.08)) +\n  scale_color_manual(\n    name = NULL,\n    breaks = c(\"Raw weekly rate\", \"4-week smoothed rate\", \"COVID\"),\n    values = c(\"lightgray\", \"black\", \"#2c8c99\")\n  ) +\n  my_plot_styling()\n\nrate_plot"
+  },
+  {
+    "objectID": "index.html#peds-mh-ed-visit-rate-data-2",
+    "href": "index.html#peds-mh-ed-visit-rate-data-2",
+    "title": "",
+    "section": "Peds MH ED visit rate data",
+    "text": "Peds MH ED visit rate data\nLet’s plot the rate data, smoothed with a rolling average\n\n\n\n\n\n\n\n\n\n\n\nSeasonality: peaks April/November, troughs January/July\n\n\nTrend fairly flat over time\n\n\nChanges post-COVID (blue line)?\n\n\n\nWe can use timeseries methods and fable to estimate"
+  },
+  {
+    "objectID": "index.html#arima-models",
+    "href": "index.html#arima-models",
+    "title": "",
+    "section": "ARIMA models",
+    "text": "ARIMA models\n\nSpecific class of timeseries models\n\n\n\n\n\n\nAR:\n\n\n\nI:\n\n\n\nMA:\n\n\n\n\nautoregressive (lagged observations as inputs)\n\n\n\nintegrated (differencing to make series stationary)\n\n\n\nmoving average (lagged errors as inputs)\n\n\n\n\n\n\n\n\nSeasonal and multivariable (“dynamic”) extensions exist, which is what we’ll use\n\n\n\n\n\n\n\n\n\n From Mitchell O’Hara-Wild: “An ARIMA model is rarely interpretable in terms of visible data structures like trend and seasonality. But it can capture a huge range of time series patterns.”"
+  },
+  {
+    "objectID": "index.html#fitting-an-arima-model-with-our-data",
+    "href": "index.html#fitting-an-arima-model-with-our-data",
+    "title": "",
+    "section": "Fitting an ARIMA model with our data",
+    "text": "Fitting an ARIMA model with our data\n\n\nResearch question: What would pediatric MH ED rates have looked like had COVID not happened?\n\n\n\nProcess:\n\nFit ARIMA model on baseline (pre-COVID) data\n\nForecast baseline model into the COVID time period\n\n“Counterfactual” forecast ignoring COVID\n\nCompare counterfactual forecast with reality"
+  },
+  {
+    "objectID": "index.html#fit-arima-model-on-baseline-data",
+    "href": "index.html#fit-arima-model-on-baseline-data",
+    "title": "",
+    "section": "1. Fit ARIMA model on baseline data",
+    "text": "1. Fit ARIMA model on baseline data\n\n\n\nbaseline_data &lt;- ts_weekly |&gt;\n  filter(week &lt; yearweek(\"2020 W10\"))\n\nbaseline_fit &lt;- baseline_data |&gt;\n  model(\n    arima = ARIMA(rate ~ 1 + pdq(2, 0, 0) + PDQ(0, 1, 1))\n  )\n\nbaseline_fit\n\n\n\n# A mable: 1 x 1\n                               arima\n                             &lt;model&gt;\n1 &lt;ARIMA(2,0,0)(0,1,1)[52] w/ drift&gt;\n\n\n\n\n\n\n\nNote: ARIMA model specification and diagnostics are beyond the scope of this presentation. See materials at end for more information."
+  },
+  {
+    "objectID": "index.html#forecast-baseline-model",
+    "href": "index.html#forecast-baseline-model",
+    "title": "",
+    "section": "2. Forecast baseline model",
+    "text": "2. Forecast baseline model\n\n\n\nCode\nfc &lt;- baseline_fit |&gt;\n  forecast(\n    h = nrow(ts_weekly |&gt;\n               filter(week &gt;= yearweek(\"2020 W10\")))  # COVID period\n  )\n\nfc |&gt;\n  autoplot(ts_weekly |&gt; filter(week &lt; yearweek(\"2020 W10\"))) +\n  my_plot_styling()"
+  },
+  {
+    "objectID": "index.html#compare-counterfactual-forecast-with-reality",
+    "href": "index.html#compare-counterfactual-forecast-with-reality",
+    "title": "",
+    "section": "3. Compare counterfactual forecast with reality",
+    "text": "3. Compare counterfactual forecast with reality\n\nBy COVID wave"
+  },
+  {
+    "objectID": "index.html#effect-estimates",
+    "href": "index.html#effect-estimates",
+    "title": "",
+    "section": "Effect estimates",
+    "text": "Effect estimates\n\n\nForecasts from baseline data are useful for visualization\n\nHowever, we didn’t get statistical estimates of excess rates\n\ni.e., difference between observed and actual\n\n\nWe can get these by fitting a model on all data, using COVID waves as covariates"
+  },
+  {
+    "objectID": "index.html#full-arima-model",
+    "href": "index.html#full-arima-model",
+    "title": "",
+    "section": "Full ARIMA model",
+    "text": "Full ARIMA model\n\nNote: rate multiplied by 10,000 for interpretability\n\n\n\n\n\n\nfull_fit &lt;- ts_weekly |&gt;\n  model(\n    arima = ARIMA(rate ~ 1 + pdq(2, 0, 0) + PDQ(0, 1, 1) + covid_wave)\n  )\n\nfull_fit |&gt; my_cleaning()\n\n\n\n\n\n\n# A tibble: 5 × 4\n  wave    est `2.5 %` `97.5 %`\n  &lt;chr&gt; &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;\n1 wave1  70.0   13.2      127.\n2 wave2 141.    97.9      185.\n3 wave3  58.8    1.06     117.\n4 wave4 108.    35.7      180.\n5 wave5  39.2  -33.0      111."
+  },
+  {
+    "objectID": "index.html#what-did-we-learn",
+    "href": "index.html#what-did-we-learn",
+    "title": "",
+    "section": "What did we learn?",
+    "text": "What did we learn?\n\n\n\nFrom our analysis,\n\nNYC pediatric mental health is in crisis, and COVID may have exacerbated it\n\n\nIn general,\n\nTimeseries methods allow us to answer interesting, important questions using data over time\n\nThe tidyverts suite of packages can help us along the way"
+  },
+  {
+    "objectID": "index.html#section",
+    "href": "index.html#section",
+    "title": "",
+    "section": "",
+    "text": "thanks\n\nquestions? (I’m still learning!)"
+  },
+  {
+    "objectID": "index.html#citations-and-further-reading",
+    "href": "index.html#citations-and-further-reading",
+    "title": "",
+    "section": "Citations and further reading",
+    "text": "Citations and further reading\n\n\nThe whole tidyverts has great documentation for all your timeseries needs\nMuch of this was learned in Mitchell O’Hara-Wild’s workshop at the 2023 NYR Conference: “Tidy time series & forecasting in R”\n\nRob Hyndman and George Athanasopoulos’s textbook contains everything you’d ever want to know about forecasting in R: Forecasting: Principles and Practice (2nd ed.)\n\nRob Fuqua’s “Statistical forecasting: notes on regression and time series analysis” contains helpful materials, especially on ARIMA model specification"
+  }
+]
